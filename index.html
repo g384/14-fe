@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>إلى أميرة قلبي 💖</title>
+    <style>
+        body {
+            margin: 0; padding: 0; overflow: hidden;
+            background: radial-gradient(circle, #fff0f6 0%, #ffdde1 100%);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; touch-action: none;
+        }
+
+        #main-title {
+            font-size: clamp(30px, 12vw, 55px);
+            color: #ff4081; z-index: 100;
+            animation: floatTitle 3s ease-in-out infinite;
+        }
+
+        @keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        #message-box {
+            z-index: 100; background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px); padding: 20px; border-radius: 30px;
+            max-width: 85%; opacity: 0; transition: 2s; border: 1px solid white;
+        }
+
+        .falling-word {
+            position: absolute; white-space: nowrap; font-weight: bold;
+            color: #ff6090; animation: rainFall linear forwards; z-index: 10;
+            text-shadow: 1px 1px 2px white;
+        }
+
+        @keyframes rainFall {
+            0% { transform: translateY(-100px) rotate(-10deg); opacity: 0; }
+            10% { opacity: 1; }
+            100% { transform: translateY(110vh) rotate(10deg); opacity: 0; }
+        }
+
+        /* الألعاب النارية (القلوب المتفجرة) */
+        .firework {
+            position: absolute; pointer-events: none;
+            animation: explode 1s ease-out forwards; z-index: 150;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3) translate(var(--x), var(--y)); opacity: 0; }
+        }
+
+        #startBtn {
+            padding: 20px 60px; background: #ff4081; color: white;
+            border: none; border-radius: 50px; font-size: 24px; font-weight: bold;
+            cursor: pointer; z-index: 200; box-shadow: 0 10px 25px rgba(255, 64, 129, 0.4);
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <button id="startBtn" onclick="initExperience()">افتحي المفاجأة يا مرام 🎀</button>
+
+    <h1 id="main-title" class="hidden">إلى أميرة العالم 💖</h1>
+    
+    <div id="message-box" class="hidden">
+        <p style="color: #c2185b; font-weight: bold; margin:0;">
+            شكراً على كل شيء يا أجمل إنسانة.. <br> 
+            يا بنتي الغالية "مرام" 🌸🧸 <br>
+            <span style="font-size: 0.7em;">(هزي الجوال يا روحي)</span>
+        </p>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="https://files.catbox.moe/9df31y.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const words = ["يا بنتي الغالية", "شكراً لچ يا روحي", "تعبچ على راسي", "يا أغلى مرام", "يا أميرتي", "فديت قلبچ"];
+        let lastX, lastY, lastZ;
+        let moveThreshold = 15; // قوة الهزة المطلوبة
+
+        function initExperience() {
+            // طلب إذن الحركة للآيفون
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            window.addEventListener('devicemotion', handleMotion);
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                window.addEventListener('devicemotion', handleMotion);
+            }
+
+            document.getElementById("bgMusic").play();
+            document.getElementById("startBtn").classList.add("hidden");
+            document.getElementById("main-title").classList.remove("hidden");
+            const box = document.getElementById("message-box");
+            box.classList.remove("hidden");
+            setTimeout(() => box.style.opacity = 1, 100);
+
+            setInterval(createRain, 800);
+        }
+
+        function handleMotion(event) {
+            let acceleration = event.accelerationIncludingGravity;
+            let curX = acceleration.x;
+            let curY = acceleration.y;
+            let curZ = acceleration.z;
+
+            if (lastX !== undefined) {
+                let deltaX = Math.abs(curX - lastX);
+                let deltaY = Math.abs(curY - lastY);
+                let deltaZ = Math.abs(curZ - lastZ);
+
+                if (deltaX + deltaY + deltaZ > 30) { // تم كشف هزة قوية
+                    createFirework();
+                }
+            }
+            lastX = curX; lastY = curY; lastZ = curZ;
+        }
+
+        function createFirework() {
+            for(let i=0; i<15; i++) {
+                const f = document.createElement("div");
+                f.className = "firework";
+                f.innerText = ["💖", "✨", "🌸", "⭐"][Math.floor(Math.random()*4)];
+                f.style.left = "50vw";
+                f.style.top = "50vh";
+                f.style.setProperty('--x', (Math.random()*400 - 200) + 'px');
+                f.style.setProperty('--y', (Math.random()*400 - 200) + 'px');
+                document.body.appendChild(f);
+                setTimeout(() => f.remove(), 1000);
+            }
+        }
+
+        function createRain() {
+            const span = document.createElement("span");
+            span.className = "falling-word";
+            span.innerText = "🌸 " + words[Math.floor(Math.random() * words.length)];
+            span.style.left = (Math.random() * 90) + "vw";
+            span.style.fontSize = (16 + Math.random() * 10) + "px";
+            span.style.animationDuration = (5 + Math.random() * 5) + "s";
+            document.body.appendChild(span);
+            setTimeout(() => span.remove(), 10000);
+        }
+    </script>
+</body>
+</html>
