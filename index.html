@@ -11,67 +11,95 @@
             font-family: 'Segoe UI', Tahoma, sans-serif;
             height: 100vh; width: 100vw;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; touch-action: none;
         }
 
-        #main-title {
-            font-size: clamp(30px, 12vw, 55px);
-            color: #ff4081; z-index: 100;
-            animation: floatTitle 3s ease-in-out infinite;
+        /* شاشة كلمة السر */
+        #lock-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffdde1; z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #pass-input {
+            padding: 15px; border-radius: 20px; border: 2px solid #ff4081;
+            font-size: 20px; text-align: center; outline: none; margin-bottom: 15px; width: 200px;
+        }
+        #unlock-btn {
+            padding: 12px 40px; background: #ff4081; color: white;
+            border: none; border-radius: 50px; font-weight: bold; cursor: pointer;
         }
 
-        @keyframes floatTitle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-        #message-box {
-            z-index: 100; background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px); padding: 20px; border-radius: 30px;
-            max-width: 85%; opacity: 0; transition: 2s; border: 1px solid white;
+        /* العداد */
+        #counter-container {
+            z-index: 100; margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 20px; border-radius: 30px; border: 2px solid white;
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.4);
         }
+        .timer-title { color: #c2185b; margin: 0 0 10px 0; font-size: 18px; font-weight: bold; }
+        .time-box { display: inline-block; margin: 0 8px; color: #ff1493; }
+        .time-num { font-size: clamp(20px, 6vw, 28px); font-weight: 900; display: block; }
+        .time-label { font-size: 12px; color: #ad1457; }
 
+        #main-title { font-size: clamp(26px, 9vw, 45px); color: #ff4081; z-index: 100; margin: 10px 0; text-shadow: 0 0 10px rgba(255,255,255,0.8); }
+
+        /* مطر الغزل والشكر */
         .falling-word {
             position: absolute; white-space: nowrap; font-weight: bold;
-            color: #ff6090; animation: rainFall linear forwards; z-index: 10;
+            pointer-events: none; animation: rainFall linear forwards; z-index: 10;
             text-shadow: 1px 1px 2px white;
         }
-
         @keyframes rainFall {
-            0% { transform: translateY(-100px) rotate(-10deg); opacity: 0; }
+            0% { transform: translateY(-100px) rotate(-15deg); opacity: 0; }
             10% { opacity: 1; }
-            100% { transform: translateY(110vh) rotate(10deg); opacity: 0; }
+            100% { transform: translateY(110vh) rotate(15deg); opacity: 0; }
         }
 
-        /* الألعاب النارية (القلوب المتفجرة) */
-        .firework {
-            position: absolute; pointer-events: none;
-            animation: explode 1s ease-out forwards; z-index: 150;
+        /* نجوم متلألئة */
+        .star {
+            position: absolute; background: white; border-radius: 50%;
+            pointer-events: none; animation: twinkle var(--d) infinite;
         }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; transform: scale(1.2); } }
 
+        /* الألعاب النارية عند الهز */
+        .firework { position: absolute; pointer-events: none; animation: explode 1s ease-out forwards; z-index: 150; font-size: 24px; }
         @keyframes explode {
             0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(3) translate(var(--x), var(--y)); opacity: 0; }
-        }
-
-        #startBtn {
-            padding: 20px 60px; background: #ff4081; color: white;
-            border: none; border-radius: 50px; font-size: 24px; font-weight: bold;
-            cursor: pointer; z-index: 200; box-shadow: 0 10px 25px rgba(255, 64, 129, 0.4);
+            100% { transform: scale(4) translate(var(--x), var(--y)); opacity: 0; }
         }
 
         .hidden { display: none !important; }
     </style>
 </head>
-<body>
+<body onclick="playMusicOnFirstClick()">
 
-    <button id="startBtn" onclick="initExperience()">افتحي المفاجأة يا مرام 🎀</button>
+    <div id="lock-screen">
+        <div style="font-size: 50px; margin-bottom: 10px;">🔒</div>
+        <h2 style="color: #c2185b; margin-bottom: 20px;">ادخلي الرمز السري يا اميرة 💖</h2>
+        <input type="number" id="pass-input" placeholder="الرمز السري">
+        <button id="unlock-btn" onclick="checkPassword()">دخول ✨</button>
+    </div>
 
-    <h1 id="main-title" class="hidden">إلى أميرة العالم 💖</h1>
-    
-    <div id="message-box" class="hidden">
-        <p style="color: #c2185b; font-weight: bold; margin:0;">
-            شكراً على كل شيء يا أجمل إنسانة.. <br> 
-            يا بنتي الغالية "مرام" 🌸🧸 <br>
-            <span style="font-size: 0.7em;">(هزي الجوال يا روحي)</span>
-        </p>
+    <div id="main-content" class="hidden">
+        <div id="counter-container">
+            <h3 class="timer-title">صار النه سوية:</h3>
+            <div id="timer">
+                <div class="time-box"><span id="days" class="time-num">0</span><span class="time-label">يوم</span></div>
+                <div class="time-box"><span id="hours" class="time-num">0</span><span class="time-label">ساعة</span></div>
+                <div class="time-box"><span id="minutes" class="time-num">0</span><span class="time-label">دقيقة</span></div>
+                <div class="time-box"><span id="seconds" class="time-num">0</span><span class="time-label">ثانية</span></div>
+            </div>
+        </div>
+
+        <h1 id="main-title">إلى أميرة العالم 💖</h1>
+        <div id="message-box" style="z-index:100; text-align:center;">
+            <p style="color: #c2185b; font-weight: bold; line-height: 1.5; margin:0; font-size: 18px;">
+                شكراً على كل شيء يا أجمل إنسانة.. <br> 
+                يا بنتي الغالية "مرام" 🌸🧸 <br>
+                <span style="font-size: 0.7em; color: #ff4081;">(هزي الجوال يا روحي  )</span>
+            </p>
+        </div>
     </div>
 
     <audio id="bgMusic" loop>
@@ -79,75 +107,98 @@
     </audio>
 
     <script>
-        const words = ["يا بنتي الغالية", "شكراً لچ يا روحي", "تعبچ على راسي", "يا أغلى مرام", "يا أميرتي", "فديت قلبچ"];
-        let lastX, lastY, lastZ;
-        let moveThreshold = 15; // قوة الهزة المطلوبة
+        const startDate = new Date(2025, 0, 26, 0, 0, 0); 
+        const correctPassword = "2007";
+        const ghazalWords = [
+            "أحبچ حيل", "يا روحي", "عشقي مرام", "بنتي الغالية", "شكراً لچ", 
+            "نور عيوني", "يا أميرتي", "دنيتي كولها", "فديت قلبچ", "سندي", 
+            "يا أغلى ناسي", "ممنون منچ", "يا ضحكتي", "كل حياتي", "يا وردتي"
+        ];
 
-        function initExperience() {
-            // طلب إذن الحركة للآيفون
-            if (typeof DeviceMotionEvent.requestPermission === 'function') {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            window.addEventListener('devicemotion', handleMotion);
-                        }
-                    })
-                    .catch(console.error);
+        function checkPassword() {
+            const input = document.getElementById("pass-input").value;
+            if (input === correctPassword) {
+                document.getElementById("lock-screen").classList.add("hidden");
+                document.getElementById("main-content").classList.remove("hidden");
+                initExperience();
             } else {
-                window.addEventListener('devicemotion', handleMotion);
+                alert("الرمز خطأ يا مرام! جربي مرة ثانية 🌸");
             }
-
-            document.getElementById("bgMusic").play();
-            document.getElementById("startBtn").classList.add("hidden");
-            document.getElementById("main-title").classList.remove("hidden");
-            const box = document.getElementById("message-box");
-            box.classList.remove("hidden");
-            setTimeout(() => box.style.opacity = 1, 100);
-
-            setInterval(createRain, 800);
         }
 
-        function handleMotion(event) {
-            let acceleration = event.accelerationIncludingGravity;
-            let curX = acceleration.x;
-            let curY = acceleration.y;
-            let curZ = acceleration.z;
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+            document.getElementById("days").innerText = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById("hours").innerText = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            document.getElementById("minutes").innerText = Math.floor((diff / 1000 / 60) % 60);
+            document.getElementById("seconds").innerText = Math.floor((diff / 1000) % 60);
+        }
 
-            if (lastX !== undefined) {
-                let deltaX = Math.abs(curX - lastX);
-                let deltaY = Math.abs(curY - lastY);
-                let deltaZ = Math.abs(curZ - lastZ);
-
-                if (deltaX + deltaY + deltaZ > 30) { // تم كشف هزة قوية
-                    createFirework();
-                }
+        function initExperience() {
+            const music = document.getElementById("bgMusic");
+            music.play().catch(() => { console.log("Music wait for interaction"); });
+            
+            setInterval(updateTimer, 1000);
+            updateTimer();
+            setInterval(createLoveRain, 500); // سرعة المطر
+            createStars();
+            
+            if (window.DeviceMotionEvent && typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission();
             }
-            lastX = curX; lastY = curY; lastZ = curZ;
+            window.addEventListener('devicemotion', handleMotion);
+        }
+
+        function createStars() {
+            for (let i = 0; i < 40; i++) {
+                const star = document.createElement("div");
+                star.className = "star";
+                const size = Math.random() * 3 + "px";
+                star.style.width = size; star.style.height = size;
+                star.style.left = Math.random() * 100 + "vw";
+                star.style.top = Math.random() * 100 + "vh";
+                star.style.setProperty('--d', (Math.random() * 3 + 1) + 's');
+                document.body.appendChild(star);
+            }
+        }
+
+        function createLoveRain() {
+            const span = document.createElement("span");
+            span.className = "falling-word";
+            span.innerText = ghazalWords[Math.floor(Math.random() * ghazalWords.length)];
+            span.style.left = (Math.random() * 90) + "vw";
+            span.style.color = ["#ff1493", "#ff69b4", "#ff4081", "#c2185b"][Math.floor(Math.random()*4)];
+            span.style.fontSize = (16 + Math.random() * 12) + "px";
+            span.style.animationDuration = (4 + Math.random() * 4) + "s";
+            document.body.appendChild(span);
+            setTimeout(() => span.remove(), 8000);
+        }
+
+        let lastX, lastY, lastZ;
+        function handleMotion(event) {
+            let acc = event.accelerationIncludingGravity;
+            if (!acc || lastX === undefined) { lastX = acc.x; lastY = acc.y; lastZ = acc.z; return; }
+            let delta = Math.abs(acc.x - lastX) + Math.abs(acc.y - lastY) + Math.abs(acc.z - lastZ);
+            if (delta > 35) createFirework();
+            lastX = acc.x; lastY = acc.y; lastZ = acc.z;
         }
 
         function createFirework() {
             for(let i=0; i<15; i++) {
                 const f = document.createElement("div");
                 f.className = "firework";
-                f.innerText = ["💖", "✨", "🌸", "⭐"][Math.floor(Math.random()*4)];
-                f.style.left = "50vw";
-                f.style.top = "50vh";
-                f.style.setProperty('--x', (Math.random()*400 - 200) + 'px');
-                f.style.setProperty('--y', (Math.random()*400 - 200) + 'px');
+                f.innerText = ["💖", "✨", "🌸", "💍"][Math.floor(Math.random()*4)];
+                f.style.left = "50vw"; f.style.top = "50vh";
+                f.style.setProperty('--x', (Math.random()*600 - 300) + 'px');
+                f.style.setProperty('--y', (Math.random()*600 - 300) + 'px');
                 document.body.appendChild(f);
                 setTimeout(() => f.remove(), 1000);
             }
         }
 
-        function createRain() {
-            const span = document.createElement("span");
-            span.className = "falling-word";
-            span.innerText = "🌸 " + words[Math.floor(Math.random() * words.length)];
-            span.style.left = (Math.random() * 90) + "vw";
-            span.style.fontSize = (16 + Math.random() * 10) + "px";
-            span.style.animationDuration = (5 + Math.random() * 5) + "s";
-            document.body.appendChild(span);
-            setTimeout(() => span.remove(), 10000);
+        function playMusicOnFirstClick() {
+            document.getElementById("bgMusic").play();
         }
     </script>
 </body>
